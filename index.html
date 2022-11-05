@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Translate js - Bianel</title>
+    <link rel="stylesheet" href="main.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+  </head>
+  <body class="animate__animated animate__bounceInUp">
+    <h1>Analizador de lexico, Sintaxis, Semantico y traductor</h1>
+    <main>
+      <div>
+        <textarea name="textbox" id="textbox" cols="200" rows="20" placeholder="Código">
+          function pepe() {
+            let juan = "das";
+            let das = "das";
+        
+
+          function pepe2() {
+            let juan1 = "das";
+            let juan2 = "das";
+            function pepe2() {
+              let juan = "das";
+              let juan2 = das;
+            }
+          }
+          let juana = 1;
+        }
+          </textarea
+        >
+        <br />
+        <button id="submmit">Analizar</button>
+        <div class="flex justify-center mt-10">
+          <table id="table"></table>
+          <div style="margin-left: 10px;">
+            <p>Errores encontrados del analizador <b>sintatico</b>: <span id="errorCount"></span></p>
+            <table id="table-syntax"></table>
+            <p>Errores encontrados del analizador <b>semantico</b>: <span id="errorCountSemantic"></span></p>
+            <table id="table-semantic"></table>
+          </div>
+        </div>
+        <p class="about">Bianel Rodriguez - 1-17-2459</p>
+      </div>
+    </main>
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

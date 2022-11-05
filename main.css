@@ -1,0 +1,61 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: darkslategray;
+  color: white;
+  font-family: "Source Code Pro", monospace;
+}
+
+h1 {
+  text-align: center;
+}
+
+button {
+  text-decoration: none;
+  background-color: darkslategrey;
+  color: white;
+  border-width: 2px;
+  border-color: white;
+  padding: 5px 20px;
+  margin-top: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.5s ease-in-out;
+}
+
+button:hover {
+  background-color: white;
+  color: black;
+}
+main div {
+  text-align: center;
+}
+table,
+td,
+th {
+  border: 1px solid;
+  padding: 10px;
+}
+
+table {
+  border-collapse: collapse;
+  border-color: white;
+  border-width: 1px;
+}
+
+.mt-10 {
+  margin-top: 10px;
+}
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.flex {
+  display: flex;
+}
+
