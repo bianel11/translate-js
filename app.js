@@ -423,7 +423,9 @@ function translate(result) {
   
   // change variables declaration
   result = result.map(x => {
-    if(x.type === 'Identificador') {
+    if(x.type === 'Identificador' && x.text === "console.log") {
+      x.text = "echo";
+    }else if(x.type === 'Identificador') {
       x.text = "$" + x.text
     }
     return x;
@@ -457,7 +459,7 @@ function printOnTablePHP(result) {
     }
   })
 
-  data+= "?>"
+  data+= "\n ?>"
   
   textboxPhp.value = data;
 }
