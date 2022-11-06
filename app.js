@@ -1,6 +1,7 @@
 import words from "./constants.js";
 
 const textbox = document.getElementById("textbox");
+const textboxPhp = document.getElementById("textbox-php");
 let result = [];
 let errorList = [];
 const table = document.getElementById("table");
@@ -120,16 +121,23 @@ function analize() {
         Array.from(text).forEach((el) => {
           if ([endline, parenthesesL, parenthesesR, keysL, keysR].includes(el)) {
             if (sub) {
-              if (words.numbers.test(text)) {
+              if (words.numbers.test(text) && isNaN(text)) {
                 result.push({
                   text: sub,
                   type: "Número",
                 });
               } else {
-                result.push({
-                  text: sub,
-                  type: Array.from(sub).includes('"') ? "String" : "Identificador",
-                });
+                if(isNaN(sub)){
+                  result.push({
+                    text: sub,
+                    type: Array.from(sub).includes('"') ? "String" : "Identificador",
+                  });
+                } else {
+                  result.push({
+                    text: sub,
+                    type: "Número",
+                  });
+                }
               }
             }
 
@@ -277,7 +285,7 @@ function scopeMapping(result) {
       for (let index = pos + 1; index < result.length; index++) {
         result[index].scope = scope;
         result[index].profundidad = result[index].profundidad || saltos;
-        result[index].papa =  result[index].type === "LlaveIzq"  ?  scopesList[result[index].profundidad] : scopesList[result[index].profundidad - 1]  || "GLOBAL";
+        result[index].father =  result[index].type === "LlaveIzq"  ?  scopesList[result[index].profundidad] : scopesList[result[index].profundidad - 1]  || "GLOBAL";
         if(result[index].type === "LlaveIzq") {
           saltos++;
         }
@@ -300,14 +308,14 @@ function scopeMapping(result) {
 function buscarVariableScope(nombre =  '', scope = '', result = []) {
   const exits  = result.find(x => x.scope === scope && x.text === nombre && x.type === 'Identificador');
   const variables = result.filter(x => x.scope === scope && x.type === 'Identificador');
-  const hasPapa = variables[0].papa;
+  const hasFather = variables[0].father;
 
   if(exits) {
     return true;
   }
 
-  else if(hasPapa) {
-    return buscarVariableScope(nombre, hasPapa, result)
+  else if(hasFather) {
+    return buscarVariableScope(nombre, hasFather, result)
   }
 
   else {
@@ -318,7 +326,6 @@ function buscarVariableScope(nombre =  '', scope = '', result = []) {
 // Semantic analizer
 function semanticAnalizer(result) {
   const errorList = [];
-  console.table(result)
   const items = {};
   
   // Buscar redeclaraciones
@@ -347,9 +354,8 @@ function semanticAnalizer(result) {
       if(variablesAnterioresDelScope.find(x => x.text === element.text)) {
         return;
       } 
-      else if(element.papa) {
-
-       if(!buscarVariableScope(element.text, element.papa, result)){
+      else if(element.father) {
+       if(!buscarVariableScope(element.text, element.father, result)){
         errorList.push(
           `Error ${element.text} no está declarada`
         );
@@ -362,6 +368,27 @@ function semanticAnalizer(result) {
       }
     }
   });  
+
+  // asignar valores a variables 
+  result =  result.map((element, pos) => {
+    if(element.type === "Identificador" && result[pos + 1]?.type === "Comparación/igualación") {
+      // evaluar valor 
+      element.valores = []
+      for (let index = pos + 2; index < result.length; index++) {
+        if(result[index].type === 'Fin linea') {
+          break;
+        }else {
+          // console.log(result[index])
+          element.valores.push(result[index].value || result[index].text)
+        }
+      }
+      element.value = element.valores.toString().replaceAll(",", " ");
+    }
+    else if(element.type === "Identificador" && result[pos - 1]?.type === "Función") {
+      element.type = "Indentificador_de_función";
+    }
+    return element;
+  }) 
 
   document.getElementById('errorCountSemantic').innerText = errorList.length;
   if(errorList.length) {
@@ -382,4 +409,55 @@ function semanticAnalizer(result) {
       tableSemantic.appendChild(row);
     });
   }
+
+  result = translate(result)
+  printOnTablePHP(result);
+}
+
+
+
+// translate function
+function translate(result) {
+  // remove var, let and const 
+  result = result.filter(x => !['var', 'let', 'const'].includes(x.text))
+  
+  // change variables declaration
+  result = result.map(x => {
+    if(x.type === 'Identificador') {
+      x.text = "$" + x.text
+    }
+    return x;
+  })
+
+  return result;
+}
+
+function printOnTablePHP(result) {
+  console.table(result)
+  let spaces = [];
+  let data = '<?php \n';
+  
+  result.forEach((x, po) => {
+    data+= x.text;
+
+    if(!["ParentesisIq", "ParentesisDer"].includes(x.type)){
+      if(x.type === "LlaveIzq") {
+        spaces.push(" ")
+        data+= "\n" + spaces.toString().replaceAll(",", ""); 
+      }
+     else if(x.type === "LlaveDer") {
+       spaces.pop()
+        data+= "\n" + spaces.toString().replaceAll(",", ""); 
+      }
+      else if(x.type === "Fin linea") {
+        data+= "\n" + spaces.toString().replaceAll(",", "");
+      }else {
+        if(result[po + 1].type !== "Fin linea") data+= " ";
+      }
+    }
+  })
+
+  data+= "?>"
+  
+  textboxPhp.value = data;
 }
