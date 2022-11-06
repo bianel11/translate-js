@@ -1,4 +1,5 @@
 import words from "./constants.js";
+import { randomHash } from './utils.js';
 
 const textbox = document.getElementById("textbox");
 const textboxPhp = document.getElementById("textbox-php");
@@ -52,7 +53,7 @@ function analize() {
     .replace(/(\r\n|\n|\r)/gm, " ") /* Removemos saltos de linea */
     .split(" ") /* Dividemos el texto en palabras */
     .filter((word) => word !== ""); /* Filtramos los espacios en blanco */
-
+  let tempString = "";
   // Recorremos el texto
   for (let i = 0; i < formattedText.length; i++) {
     const text = formattedText[i];
@@ -110,8 +111,48 @@ function analize() {
         [keysL]: "LlaveIzq",
         [keysR]: "LlaveDer",
       };
+     
+      if(text.split('"').length === 3) {
+          result.push({
+            text: text.replace(";", ""),
+            type: "String",
+          });
+          result.push({
+            text: ";",
+            type: "Fin linea",
+          });
+      }
 
-      if (
+      else if(!tempString && text.includes('"')) {
+        tempString+= text;
+      }
+      else if(tempString && !text.includes('"')) {
+        tempString = " " + text;
+
+      }
+
+      else if(tempString && text.includes('"')){
+        if(text.includes(';')) {
+          tempString+= " " + text.replace(";", "");
+          result.push({
+            text: tempString,
+            type: "String",
+          });
+          result.push({
+            text: ";",
+            type: "Fin linea",
+          });
+        }else {
+
+          result.push({
+            text: tempString,
+            type: "String",
+          });
+        }
+        tempString = '';
+      }
+
+    else if (
         text.includes(endline) ||
         text.includes(parenthesesL) ||
         text.includes(parenthesesR) || 
@@ -279,11 +320,12 @@ function scopeMapping(result) {
     }
     if(element.type === "LlaveIzq"){
       let saltos = 0;
-      scope = (Math.random() + 1).toString(36).substring(7);
+      scope = randomHash();
       element.scope = scope;
       scopesList.push(scope)
       for (let index = pos + 1; index < result.length; index++) {
         result[index].scope = scope;
+        result[index].unique = randomHash();
         result[index].profundidad = result[index].profundidad || saltos;
         result[index].father =  result[index].type === "LlaveIzq"  ?  scopesList[result[index].profundidad] : scopesList[result[index].profundidad - 1]  || "GLOBAL";
         if(result[index].type === "LlaveIzq") {
@@ -331,11 +373,18 @@ function semanticAnalizer(result) {
   // Buscar redeclaraciones
   result.filter(x => x.type === 'Identificador').forEach(x => {
     const scope = items[x.scope] || {};
-    if(scope[x.text]) {
+    const pos = result.findIndex(y => y.scope === x.scope && y.unique === x.unique);
+    // console.log(result[pos -1])
+
+    if(scope[x.text] && result[pos - 1].type === "Declaración") {
+      console.log(scope , result[pos - 1])
       errorList.push(
         `Error ${x.text} está siendo redeclarada en el mismo scope`
       );
-    }else {
+    }
+
+    else if(result[pos - 1]?.type === "Declaración") {
+      // console.log(x.text)
       items[x.scope] = {
         ...items[x.scope],
         [x.text]: x.text
@@ -409,6 +458,7 @@ function semanticAnalizer(result) {
       tableSemantic.appendChild(row);
     });
   }
+  console.table(result)
 
   result = translate(result)
   printOnTablePHP(result);
@@ -435,7 +485,6 @@ function translate(result) {
 }
 
 function printOnTablePHP(result) {
-  console.table(result)
   let spaces = [];
   let data = '<?php \n';
   
