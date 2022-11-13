@@ -3,12 +3,13 @@ import { randomHash } from './utils.js';
 
 const textbox = document.getElementById("textbox");
 const textboxPhp = document.getElementById("textbox-php");
+const textIntermedio = document.getElementById('textbox-intermedio');
 let result = [];
 let errorList = [];
 const table = document.getElementById("table");
 const tableSyntax = document.getElementById("table-syntax");
-const tableSemantic = document.getElementById("table-semantic")
-;
+const tableSemantic = document.getElementById("table-semantic");
+
 document.querySelector("#submmit").addEventListener("click", analize);
 
 function resetAll() {
@@ -18,6 +19,8 @@ function resetAll() {
                         <tr>
                         <th>Token</th>
                         <th>Lexema</th>
+                        <th>Scope</th>
+                        <th>Padre</th>
                         <th>#</th>
                         </tr>
                     </thead>
@@ -200,28 +203,7 @@ function analize() {
       }
     }
   }
-  // Recoremos el resultado y lo agregamos en la tabla
-  result.forEach((word, i) => {
-    const row = document.createElement("tr");
-    const token = document.createElement("td");
-    const lexema = document.createElement("td");
-    const number = document.createElement("td");
-
-    token.classList.add("animate__animated");
-    token.classList.add("animate__fadeInUp");
-    lexema.classList.add("animate__animated");
-    lexema.classList.add("animate__fadeInUp");
-    number.classList.add("animate__animated");
-    number.classList.add("animate__fadeInUp");
-
-    token.innerText = word.type;
-    lexema.innerText = word.text;
-    number.innerText = i + 1;
-    row.appendChild(token);
-    row.appendChild(lexema);
-    row.appendChild(number);
-    table.appendChild(row);
-  });
+  
 
   parse(result);
 }
@@ -459,6 +441,43 @@ function semanticAnalizer(result) {
     });
   }
   console.table(result)
+  textIntermedio.value = JSON.stringify(result, null, 4);
+
+// Recoremos el resultado y lo agregamos en la tabla
+result.forEach((word, i) => {
+  const row = document.createElement("tr");
+  const token = document.createElement("td");
+  const lexema = document.createElement("td");
+  const scope = document.createElement("td");
+  const number = document.createElement("td");
+  const padre = document.createElement("td");
+  
+  token.classList.add("animate__animated");
+  token.classList.add("animate__fadeInUp");
+  lexema.classList.add("animate__animated");
+  lexema.classList.add("animate__fadeInUp");
+  number.classList.add("animate__animated");
+  number.classList.add("animate__fadeInUp");
+  
+  scope.classList.add("animate__animated");
+  scope.classList.add("animate__fadeInUp");
+  padre.classList.add("animate__animated");
+  padre.classList.add("animate__fadeInUp");
+  
+
+  token.innerText = word.type;
+  lexema.innerText = word.text;
+  number.innerText = i + 1;
+  scope.innerText = word.scope;
+  padre.innerText = word.father || "";
+
+  row.appendChild(token);
+  row.appendChild(lexema);
+  row.appendChild(scope);
+  row.appendChild(padre);
+  row.appendChild(number);
+  table.appendChild(row);
+});
 
   result = translate(result)
   printOnTablePHP(result);
@@ -497,13 +516,13 @@ function printOnTablePHP(result) {
         data+= "\n" + spaces.toString().replaceAll(",", ""); 
       }
      else if(x.type === "LlaveDer") {
-       spaces.pop()
+        spaces.pop()
         data+= "\n" + spaces.toString().replaceAll(",", ""); 
       }
       else if(x.type === "Fin linea") {
         data+= "\n" + spaces.toString().replaceAll(",", "");
       }else {
-        if(result[po + 1].type !== "Fin linea") data+= " ";
+        if(result[po + 1].type !== "Fin linea" && result[po + 1].type !== 'ParentesisIq') data+= " ";
       }
     }
   })

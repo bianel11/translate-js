@@ -1,51 +1,70 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Translate js - Bianel</title>
-    <link rel="stylesheet" href="main.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-    />
-  </head>
-  <body class="animate__animated animate__bounceInUp">
-    <h1>Analizador de lexico, Sintaxis, Semantico y traductor</h1>
-    <main>
-      <div>
-        <div style="display: flex; gap: 10px; justify-content: center;">
-          <textarea name="textbox" id="textbox" cols="70" rows="20" placeholder="Código">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Translate js - Bianel</title>
+  <link rel="stylesheet" href="main.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+</head>
+
+<body class="animate__animated animate__bounceInUp">
+  <h1>Analizador de lexico, Sintaxis, Semantico y traductor</h1>
+  <main>
+    <div>
+      <div style="display: flex; gap: 10px; justify-content: center">
+        <div class="">
+          <h4>Entrada de código</h4>
+          <textarea name="textbox" id="textbox" cols="50" rows="20" placeholder="Código">
             function hola() {
               let saludos = "Hola mundo";
               console.log(saludos);
+
+              function hola2() {
+                let saludos = "Hola mundo";
+                console.log(saludos);
+              }
             }
           </textarea>
-          <textarea name="textbox-php" id="textbox-php" cols="70" rows="10">
-            
-          </textarea>
         </div>
-        <br />
-        <button id="submmit">Analizar</button>
-        <div class="flex justify-center mt-10">
-          <table id="table"></table>
-          <div style="margin-left: 10px;">
-            <p>Errores encontrados del analizador <b>sintatico</b>: <span id="errorCount"></span></p>
-            <table id="table-syntax"></table>
-            <p>Errores encontrados del analizador <b>semantico</b>: <span id="errorCountSemantic"></span></p>
-            <table id="table-semantic"></table>
-          </div>
+        <div>
+          <h4>Código intermedio</h4>
+          <textarea name="textbox-intermedio" id="textbox-intermedio" cols="50" rows="20"></textarea>
         </div>
-        <p class="about">Bianel Rodriguez - 1-17-2459</p>
+        <div>
+          <h4>Código traducido a php</h4>
+          <textarea name="textbox-php" id="textbox-php" cols="50" rows="20"></textarea>
+        </div>
       </div>
-    </main>
-    <script src="./app.js" type="module"></script>
-  </body>
+      <br />
+      <button id="submmit">Analizar</button>
+      <div class="flex justify-center mt-10">
+        <div>
+          <h4>Tabla de simbolos</h4>
+          <table id="table"></table>
+        </div>
+        <div style="margin-left: 10px">
+          <p>
+            Errores encontrados del analizador <b>sintatico</b>:
+            <span id="errorCount"></span>
+          </p>
+          <table id="table-syntax"></table>
+          <p>
+            Errores encontrados del analizador <b>semantico</b>:
+            <span id="errorCountSemantic"></span>
+          </p>
+          <table id="table-semantic"></table>
+        </div>
+      </div>
+      <p class="about">Bianel Rodriguez - 1-17-2459</p>
+    </div>
+  </main>
+  <script src="./app.js" type="module"></script>
+</body>
+
 </html>
