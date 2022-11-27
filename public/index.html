@@ -21,15 +21,11 @@
         <div class="">
           <h4>Entrada de código</h4>
           <textarea name="textbox" id="textbox" cols="50" rows="20" placeholder="Código">
-            function hola() {
-              let saludos = "Hola mundo";
-              console.log(saludos);
-
-              function hola2() {
-                let saludos = "Hola mundo";
-                console.log(saludos);
-              }
-            }
+            function sumar(a, b) {
+              console.log(a + b);
+             }
+             
+             sumar(2, 3);
           </textarea>
         </div>
         <div>
@@ -43,6 +39,8 @@
       </div>
       <br />
       <button id="submmit">Analizar</button>
+      <button id="button-for">formatear</button>
+      <button id="button-ejecutar">ejecutar</button>
       <div class="flex justify-center mt-10">
         <div>
           <h4>Tabla de simbolos</h4>
@@ -65,7 +63,18 @@
     </div>
   </main>
   <script src="./app.js" type="module"></script>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/js-tokens@8.0.0/index.js"></script> -->
+  <script src="./standalone.js"></script>
+  <script src="./standalone-php.js"></script>
+  <script>
+    function formatear() {
+      const textboxPhp = document.getElementById("textbox-php");
+      textboxPhp.value =   prettier.format(textboxPhp.value, {
+        plugins: prettierPlugins,
+        parser: "php"
+      });
+    }
+    document.getElementById('button-for').addEventListener('click', formatear);
+  </script>
 </body>
 
 </html>

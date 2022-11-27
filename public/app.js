@@ -1,6 +1,6 @@
 import words from "./constants.js";
 import { randomHash } from './utils.js';
-// import jsotoken from './jsotoken.js'
+import Chiffon from './chiffon.js'
 const textbox = document.getElementById("textbox");
 const textboxPhp = document.getElementById("textbox-php");
 const textIntermedio = document.getElementById('textbox-intermedio');
@@ -9,8 +9,12 @@ let errorList = [];
 const table = document.getElementById("table");
 const tableSyntax = document.getElementById("table-syntax");
 const tableSemantic = document.getElementById("table-semantic");
-// console.log(Array.from(jsotoken(`let pepe = a(){}`)))
+// var Chiffon = require('chiffon');
+let isCorrect = true;
+
+
 document.querySelector("#submmit").addEventListener("click", analize);
+document.getElementById('button-ejecutar').addEventListener('click', callServer);
 
 function resetAll() {
   result = [];
@@ -43,7 +47,9 @@ tableSemantic.innerHTML = `<thead class="animate__animated animate__fadeInUp">
             </thead>
             <tbody id="table-body">
             </tbody>`;
+            textboxPhp.value = '';
 }
+
 
 // Lexical analyzer
 function analize() {
@@ -210,6 +216,12 @@ function analize() {
 
 // Syntax analyzer
 function parse(result) {
+  try {
+    Chiffon.parse(textbox.value);
+  } catch (error) {
+    isCorrect = false;
+  }
+
   result.forEach((element, pos) => {
     switch (element.type) {
       case "Declaración":
@@ -268,7 +280,7 @@ function parse(result) {
   }
 
   document.getElementById('errorCount').innerText = errorList.length;
-  if (errorList.length) {
+  if (errorList.length && !isCorrect) {
     errorList.forEach((word, i) => {
       const row = document.createElement("tr");
       const message = document.createElement("td");
@@ -388,14 +400,16 @@ function semanticAnalizer(result) {
       else if(element.father) {
        if(!buscarVariableScope(element.text, element.father, result)){
         errorList.push(
-          `Error ${element.text} no está declarada`
+          `Error ${element.text} no está declarada 1`
         );
        };
       }
       else { 
-      errorList.push(
-        `Error ${element.text} no está declarada`
-      );
+        if(element.text !== '[' && !Array.from(element.text).findIndex(x => x === "[")) {
+          errorList.push(
+            `Error ${element.text} no está declarada 2`
+            );
+          }
       }
     }
   });  
@@ -422,7 +436,7 @@ function semanticAnalizer(result) {
   }) 
 
   document.getElementById('errorCountSemantic').innerText = errorList.length;
-  if(errorList.length) {
+  if(errorList.length && !isCorrect) {
     errorList.forEach((word, i) => {
       const row = document.createElement("tr");
       const msg = document.createElement("td");
@@ -478,72 +492,33 @@ result.forEach((word, i) => {
   row.appendChild(number);
   table.appendChild(row);
 });
-
-  result = translate(result)
-  printOnTablePHP(result);
+  // alert("pepe");
+  translate(result);
+  // printOnTablePHP(result);
 }
 
 
 
 // translate function
-function translate(result) {
-  // remove var, let and const 
-  result = result.filter(x => !['var', 'let', 'const'].includes(x.text))
-  
-  // change variables declaration
-  result = result.map(x => {
-    if(x.type === 'Identificador' && x.text === "console.log") {
-      x.text = "echo";
-    }else if(x.type === 'Identificador') {
-      x.text = "$" + x.text
-    }
-    return x;
-  })
-
-  return result;
-}
-
-function printOnTablePHP(result) {
-  let spaces = [];
-  let data = '<?php \n';
-  let dataWithoutTags = '';
-  result.forEach((x, po) => {
-    data+= x.text;
-    dataWithoutTags+= x.text;
-
-    if(!["ParentesisIq", "ParentesisDer"].includes(x.type)){
-      if(x.type === "LlaveIzq") {
-        spaces.push(" ")
-        data+= "\n" + spaces.toString().replaceAll(",", ""); 
-        dataWithoutTags+= spaces.toString().replaceAll(",", ""); 
-      }
-     else if(x.type === "LlaveDer") {
-        spaces.pop()
-        data+= "\n" + spaces.toString().replaceAll(",", ""); 
-        dataWithoutTags+= spaces.toString().replaceAll(",", ""); 
-      }
-      else if(x.type === "Fin linea") {
-        data+= "\n" + spaces.toString().replaceAll(",", "");
-        dataWithoutTags+= spaces.toString().replaceAll(",", "");
-      }else {
-        if(result[po + 1].type !== "Fin linea" && result[po + 1].type !== 'ParentesisIq') {
-          data+= " ";
-          dataWithoutTags+= " ";
-        };
-      }
-    }
-  })
-
-  data+= "\n ?>"
-  
-  textboxPhp.value = data;
-  callServer(dataWithoutTags);
-
-
-}
-
-async function callServer(code) {
+async function translate(code) {
   try {
+   const req = await fetch("/to-php", {method: "POST", body: JSON.stringify({code: textbox.value}),  headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },});
+    const {result} = await req.json(); 
+
+    textboxPhp.value = result;
+
+  } catch (error) {
+    console.log()
+  } 
+
+}
+
+async function callServer() {
+  try {
+    let code = textboxPhp.value;
      await fetch("/write-php", {method: "POST", body: JSON.stringify({code, or: textbox.value}),  headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
