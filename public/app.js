@@ -1,6 +1,5 @@
 import words from "./constants.js";
 import { randomHash } from './utils.js';
-import Chiffon from './chiffon.js'
 const textbox = document.getElementById("textbox");
 const textboxPhp = document.getElementById("textbox-php");
 const textIntermedio = document.getElementById('textbox-intermedio');
@@ -9,7 +8,6 @@ let errorList = [];
 const table = document.getElementById("table");
 const tableSyntax = document.getElementById("table-syntax");
 const tableSemantic = document.getElementById("table-semantic");
-// var Chiffon = require('chiffon');
 let isCorrect = true;
 
 
@@ -217,7 +215,7 @@ function analize() {
 // Syntax analyzer
 function parse(result) {
   try {
-    Chiffon.parse(textbox.value); // Verificamos que el código sea valido
+    eval(textbox.value); // Verificamos que el código sea valido
   } catch (error) {
     isCorrect = false; // Si no es valido activamos los demás verificadores
   }
