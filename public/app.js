@@ -217,11 +217,12 @@ function analize() {
 // Syntax analyzer
 function parse(result) {
   try {
-    Chiffon.parse(textbox.value);
+    Chiffon.parse(textbox.value); // Verificamos que el código sea valido
   } catch (error) {
-    isCorrect = false;
+    isCorrect = false; // Si no es valido activamos los demás verificadores
   }
-
+  
+  // Validamos los indenfificadores
   result.forEach((element, pos) => {
     switch (element.type) {
       case "Declaración":
@@ -267,6 +268,7 @@ function parse(result) {
   const llaveIz = result.filter((el) => el.type === "LlaveIzq");
   const llaveDer = result.filter((el) => el.type === "LlaveDer");
 
+  // Validamos el conteo de parentesis y llaves
   if (parentesisIz.length !== parentesisDer.length) {
     errorList.push({
       message: "Se esperaba un parentesis de cierre",
@@ -279,8 +281,9 @@ function parse(result) {
     });
   }
 
-  document.getElementById('errorCount').innerText = errorList.length;
-  if (errorList.length && !isCorrect) {
+  document.getElementById('errorCount').innerText = 0;
+  if (errorList.length && !isCorrect) { //mapeamos los erores si hay errores y el codigo no es valido
+    document.getElementById('errorCount').innerText = errorList.length;
     errorList.forEach((word, i) => {
       const row = document.createElement("tr");
       const message = document.createElement("td");
@@ -305,7 +308,7 @@ function parse(result) {
   scopeMapping(result)
 }
 // Scope mapping
-function scopeMapping(result) {
+function scopeMapping(result) { // mapeamos el scope para verificar despues si hay declaraciones duplicadas
   let scope = '';
   let scopesList = [];
   result.map((element, pos) => {
@@ -341,6 +344,7 @@ function scopeMapping(result) {
   semanticAnalizer(result)
 }
 
+// funcion para buscar asignaciones en scope superiores 
 function buscarVariableScope(nombre =  '', scope = '', result = []) {
   const exits  = result.find(x => x.scope === scope && x.text === nombre && x.type === 'Identificador');
   const variables = result.filter(x => x.scope === scope && x.type === 'Identificador');
@@ -435,8 +439,9 @@ function semanticAnalizer(result) {
     return element;
   }) 
 
-  document.getElementById('errorCountSemantic').innerText = errorList.length;
-  if(errorList.length && !isCorrect) {
+  document.getElementById('errorCountSemantic').innerText = 0;
+  if(errorList.length && !isCorrect) { // mapeamos los errores si hay errores y el codigo no es valido
+    document.getElementById('errorCountSemantic').innerText = errorList.length;
     errorList.forEach((word, i) => {
       const row = document.createElement("tr");
       const msg = document.createElement("td");
@@ -499,7 +504,7 @@ result.forEach((word, i) => {
 
 
 
-// translate function
+// translate function: llama al server pasandole el código para traducirlo
 async function translate(code) {
   try {
    const req = await fetch("/to-php", {method: "POST", body: JSON.stringify({code: textbox.value}),  headers: {
@@ -516,7 +521,7 @@ async function translate(code) {
 
 }
 
-async function callServer() {
+async function callServer() { // llama al server para escribir el .php y abrirlo en una nueva ventana
   try {
     let code = textboxPhp.value;
      await fetch("/write-php", {method: "POST", body: JSON.stringify({code, or: textbox.value}),  headers: {
